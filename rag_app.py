@@ -1,6 +1,5 @@
 import streamlit as st
 from typing import List
-import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 import os
@@ -36,7 +35,7 @@ class SimpleRAG:
 # Load RAG once
 @st.cache_resource
 def get_rag():
-    path = "./04_content.txt"
+    path = "./content.txt"
     if not os.path.exists(path):
         st.error("Document not found!")
         return None

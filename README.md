@@ -7,7 +7,7 @@ cd rag_tfidf
 ```
 
 ```bash
-un init .
+uv init .
 ```
 
 ```bash
