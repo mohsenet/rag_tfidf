@@ -1,8 +1,8 @@
 import streamlit as st
 from typing import List, Tuple
 import re
-import os
 from io import StringIO
+import nltk
 
 # Optional NLTK
 try:
@@ -36,9 +36,11 @@ def chunk_fixed_size_with_overlap(text: str, size: int = 15, overlap: int = 0) -
             chunks.append(chunk)
     return chunks
 
+
 def chunk_sentence_regex(text: str) -> List[str]:
     sentences = re.split(r'(?<=[.!?])\s+', text.strip())
     return [s for s in sentences if s]
+
 
 def chunk_sentence_nltk(text: str) -> List[str]:
     if not _nltk_available:
@@ -85,8 +87,22 @@ class SimpleRAG:
         results = self.search_with_scores(query, top_k)
         if not results:
             return "I don't have enough information to answer that question."
-        chunks = [chunk for chunk, _ in results]
-        return f"Based on the information: {' '.join(chunks)}"
+        return f"Based on the information: {' '.join(chunk for chunk, _ in results)}"
+
+
+# ===== INITIALIZE SESSION STATE =====
+
+if "document_text" not in st.session_state:
+    st.session_state.document_text = None
+    st.session_state.document_name = None
+
+# Preserve UI controls across reloads
+if "chunking_choice" not in st.session_state:
+    st.session_state.chunking_choice = "fixed"
+if "chunk_size" not in st.session_state:
+    st.session_state.chunk_size = 10
+if "overlap" not in st.session_state:
+    st.session_state.overlap = 2
 
 
 # ===== STREAMLIT UI =====
@@ -95,71 +111,93 @@ st.set_page_config(page_title="Advanced RAG Demo", layout="centered")
 st.title("RAG Question Answering")
 st.markdown("Upload a `.txt` file and ask questions about its content.")
 
-# === FILE UPLOAD ===
+# === FILE UPLOAD (updates session state) ===
 uploaded_file = st.file_uploader("Choose a text file (.txt)", type=["txt"])
 
 if uploaded_file is not None:
-    # Read uploaded file
     stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
-    document_text = stringio.read()
-    st.success(f"✅ Uploaded: `{uploaded_file.name}` ({len(document_text)} characters)")
-else:
-    st.info("👆 Please upload a `.txt` file to begin.")
-    st.stop()  # Halt execution until file is uploaded
+    st.session_state.document_text = stringio.read()
+    st.session_state.document_name = uploaded_file.name
+    st.success(f"✅ Uploaded: `{uploaded_file.name}`")
 
-# === SIDEBAR CONTROLS ===
+# === WORK WITH SESSION STATE DOCUMENT ===
+document_text = st.session_state.document_text
+
+if document_text is None:
+    st.info("👆 Please upload a `.txt` file to begin.")
+    # Do NOT st.stop() — allow sidebar interaction and state updates
+else:
+    st.info(f"📄 Working with: **{st.session_state.document_name}** ({len(document_text)} characters)")
+
+# === SIDEBAR CONTROLS (sync with session state) ===
 st.sidebar.header("SplitOptions")
 
 chunking_choice = st.sidebar.selectbox(
     "Chunking Strategy",
     options=["fixed", "regex", "nltk"],
-    format_func=lambda x: {
-        "fixed": "Fixed-size (words)",
-        "regex": "Sentence (Regex)",
-        "nltk": "Sentence (NLTK)"
-    }[x]
+    index=["fixed", "regex", "nltk"].index(st.session_state.chunking_choice),
+    key="chunking_selector"  # optional, but helps clarity
 )
+
+# Update session state when user changes selection
+st.session_state.chunking_choice = chunking_choice
 
 chunk_size = 10
 overlap = 0
+
 if chunking_choice == "fixed":
-    chunk_size = st.sidebar.number_input("Chunk Size (words)", min_value=5, max_value=100, value=10)
-    overlap = st.sidebar.number_input("Overlap (words)", min_value=0, max_value=chunk_size - 1, value=2)
+    chunk_size = st.sidebar.number_input(
+        "Chunk Size (words)",
+        min_value=5,
+        max_value=100,
+        value=st.session_state.chunk_size,
+        key="chunk_size_input"
+    )
+    overlap = st.sidebar.number_input(
+        "Overlap (words)",
+        min_value=0,
+        max_value=chunk_size - 1,
+        value=min(st.session_state.overlap, chunk_size - 1),
+        key="overlap_input"
+    )
+    st.session_state.chunk_size = chunk_size
+    st.session_state.overlap = overlap
 
 if chunking_choice == "nltk" and not _nltk_available:
     st.warning("⚠️ NLTK not available. Install with `pip install nltk`.")
 
-# === INITIALIZE RAG WITH UPLOADED TEXT ===
-@st.cache_resource
-def get_rag(chunking_method: str, chunk_size: int, overlap: int, text_hash: str):
-    """Cache RAG based on chunking params + text content hash to avoid reprocessing."""
-    rag = SimpleRAG(chunking_method=chunking_method, chunk_size=chunk_size, overlap=overlap)
-    rag.add_documents(document_text)
-    return rag
-
-# Use a hash of the text (or first/last 100 chars) as cache key
-text_hash = str(hash(document_text[:100] + document_text[-100:] if len(document_text) > 200 else document_text))
-
-rag = get_rag(chunking_choice, chunk_size, overlap, text_hash)
-
-# === DISPLAY CHUNK METRICS ===
-st.info(f"✅ Document processed into **{len(rag.chunks)} chunks** using **{chunking_choice}** strategy.")
+# === BUILD RAG ONLY IF DOCUMENT EXISTS ===
+rag = None
+if document_text is not None:
+    try:
+        rag = SimpleRAG(
+            chunking_method=st.session_state.chunking_choice,
+            chunk_size=st.session_state.chunk_size,
+            overlap=st.session_state.overlap
+        )
+        rag.add_documents(document_text)
+        st.info(f"✅ Processed into **{len(rag.chunks)} chunks** using **{st.session_state.chunking_choice}** strategy.")
+    except Exception as e:
+        st.error(f"Error initializing RAG: {e}")
 
 # === QUERY INPUT ===
-query = st.text_input("Your question:", placeholder="e.g., What is the main topic of this document?")
-if query:
+query = st.text_input("Your question:", placeholder="e.g., What is the main idea?")
+
+if query and rag is not None:
     with st.spinner("Searching..."):
         response = rag.generate_response(query)
         results = rag.search_with_scores(query, top_k=3)
-    
+
     st.subheader("Response")
     st.write(response)
-    
+
     st.subheader("Retrieved Chunks with Similarity Scores")
     for i, (chunk, score) in enumerate(results, 1):
         st.markdown(f"**Chunk {i}** (`similarity = {score:.4f}`)")
         st.text(chunk)
         st.divider()
+elif query and rag is None:
+    st.warning("Please upload a document first.")
 
 # === SIDEBAR CREDITS ===
 st.sidebar.markdown("---")

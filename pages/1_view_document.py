@@ -1,21 +1,24 @@
 import streamlit as st
-import os
 
 st.set_page_config(page_title="View Document", layout="wide")
 st.title("📄 Full Document Content")
 
-DOC_PATH = "./content.txt"
+# Try to get document from session state
+document_text = st.session_state.get("document_text", None)
+document_name = st.session_state.get("document_name", "Uploaded Document")
 
-if os.path.exists(DOC_PATH):
-    with open(DOC_PATH, "r", encoding="utf-8") as f:
-        content = f.read()
-    st.text_area("Document:", content, height=600)
+if document_text is not None:
+    st.text_area(f"Content of '{document_name}':", document_text, height=600)
 else:
-    st.error("Document file not found!")
+    st.info(
+        "No document uploaded yet. "
+        "Please go to the **main RAG page**, upload a `.txt` file, and return here."
+    )
 
-st.markdown("👈 Use the sidebar to return to the **main RAG page**.")
+st.markdown("👈 Use the sidebar to return to the **main RAG page** or upload a file.")
 
-# --- Developer Credit in Sidebar (appears on all pages) ---
+# --- Developer Credit in Sidebar ---
+st.sidebar.markdown("---")
 st.sidebar.markdown("### Developed by:")
 st.sidebar.markdown("**Mohsen Moghimbegloo**")
 st.sidebar.markdown("[LinkedIn](https://linkedin.com/in/mohsen-moghimbegloo)")
