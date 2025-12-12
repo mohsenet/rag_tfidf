@@ -2,36 +2,46 @@ import streamlit as st
 
 st.set_page_config(page_title="About This App", layout="centered")
 
-st.title("About This App")
+st.title("About This Application")
 
 st.markdown("""
-This application demonstrates a **simple Retrieval-Augmented Generation (RAG) system** built with:
-
-- **TF-IDF vectorization** for text representation  
-- **Cosine similarity** for relevance scoring  
-- **Fixed-size chunking** of input documents  
-
-The system is designed to answer questions about a provided text document (currently focused on **Maryam Mirzakhani**, the renowned mathematician).
-
-### How It Works
-1. The document is split into small chunks.
-2. Each chunk is converted into a TF-IDF vector.
-3. When you ask a question, the query is vectorized and compared to all chunks.
-4. The top-3 most relevant chunks are retrieved and combined into a response.
-
-### Pages
-- **Main Page**: Ask questions and get AI-generated answers.
-- **View Document**: See the full source text used by the system.
-- **This Page**: Learn about the app’s design and purpose.
-
-> **Note**: This is a lightweight, educational implementation—**not a production-grade RAG system**. It uses classical NLP (not embeddings or LLMs).
-
-Built with **Streamlit**, **scikit-learn**, and **NumPy**.
+This application presents a lightweight, educational implementation of a **Retrieval-Augmented Generation (RAG)** system. It enables question-answering over a static document—currently a biographical text about **Maryam Mirzakhani**, the first woman to win the Fields Medal—using classical natural language processing techniques.
 """)
 
-st.markdown("👈 Use the sidebar to navigate back to the main interface.")
+st.markdown("### Core Components")
+st.markdown("""
+- **Text Chunking**: Splits the source document using configurable strategies (fixed-size, sentence-based with regex, or NLTK).
+- **TF-IDF Vectorization**: Transforms text chunks and queries into numerical vectors.
+- **Cosine Similarity**: Measures semantic relevance between a query and document chunks.
+- **Response Synthesis**: Combines top-retrieved chunks into a coherent answer.
+""")
 
-# --- Developer Credit in Sidebar (appears on all pages) ---
+st.markdown("### Application Structure")
+st.markdown("""
+- **Main Page**: Interact with the RAG system by asking questions.
+- **View Document**: Inspect the full source text used by the retriever.
+- **This Page**: Learn about the system's design, limitations, and technologies.
+""")
+
+st.markdown("### Important Notes")
+st.markdown("""
+- This is **not a large language model (LLM)** and does **not generate novel answers**.  
+- Responses are **directly constructed from retrieved text fragments**—no hallucination, but also no inference.
+- Designed for **learning and demonstration purposes**, not production use.
+""")
+
+st.markdown("### Built With")
+st.markdown("""
+- **Streamlit** – for the interactive web interface  
+- **scikit-learn** – for TF-IDF and cosine similarity  
+- **NumPy** – for numerical operations  
+- **Standard Python libraries** – `re`, `os`, and optional `nltk`
+""")
+
+st.markdown("👈 Navigate using the sidebar to return to the main interface or explore the full document.")
+
+# --- Developer Credit in Sidebar ---
+st.sidebar.markdown("---")
 st.sidebar.markdown("### Developed by:")
 st.sidebar.markdown("**Mohsen Moghimbegloo**")
 st.sidebar.markdown("[LinkedIn](https://linkedin.com/in/mohsen-moghimbegloo)")

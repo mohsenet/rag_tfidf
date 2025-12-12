@@ -11,7 +11,7 @@ uv init .
 ```
 
 ```bash
-uv add streamlit scikit-learn
+uv add streamlit scikit-learn nltk
 ```
 
 ```bash

@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "nltk>=3.9.2",
     "scikit-learn>=1.7.2",
     "streamlit>=1.52.1",
 ]
