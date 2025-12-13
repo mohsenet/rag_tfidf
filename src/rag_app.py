@@ -1,7 +1,8 @@
 import streamlit as st
-from io import StringIO
 from rag_engine import SimpleRAG
-from ui_components import render_developer_info
+from ui_components import render_developer_info, rag_question_answering
+from session import init_session_state, handle_uploaded_file
+
 
 
 # ===== HANDLE NLTK AVAILABILITY =====
@@ -19,26 +20,12 @@ except Exception:
 
 # ===== SESSION STATE & UI (rest unchanged) =====
 
-if "document_text" not in st.session_state:
-    st.session_state.document_text = None
-    st.session_state.document_name = None
-if "chunking_choice" not in st.session_state:
-    st.session_state.chunking_choice = "fixed"
-if "chunk_size" not in st.session_state:
-    st.session_state.chunk_size = 10
-if "overlap" not in st.session_state:
-    st.session_state.overlap = 2
+init_session_state()
 
-st.set_page_config(page_title="Advanced RAG Demo", layout="centered")
-st.title("RAG Question Answering")
-st.markdown("Upload a `.txt` file and ask questions about its content.")
+rag_question_answering()
 
 uploaded_file = st.file_uploader("Choose a text file (.txt)", type=["txt"])
-if uploaded_file is not None:
-    stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
-    st.session_state.document_text = stringio.read()
-    st.session_state.document_name = uploaded_file.name
-    st.success(f"✅ Uploaded: `{uploaded_file.name}`")
+handle_uploaded_file(uploaded_file) 
 
 document_text = st.session_state.document_text
 

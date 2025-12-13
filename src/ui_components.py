@@ -1,5 +1,11 @@
 import streamlit as st
 
+
+def rag_question_answering():
+    st.set_page_config(page_title="Advanced RAG Demo", layout="centered")
+    st.title("RAG Question Answering")
+    st.markdown("Upload a `.txt` file and ask questions about its content.")
+
 def render_developer_info():
     st.sidebar.markdown("---")
     st.sidebar.markdown("### Developed by:")
