@@ -12,10 +12,18 @@ This application presents a lightweight, educational implementation of a **Retri
 
 st.markdown("### Core Components")
 st.markdown("""
-- **Text Chunking**: Splits the source document using configurable strategies (fixed-size, sentence-based with regex, or NLTK).
+- **Text Chunking**: Splits the source document using configurable strategies (fixed-size, sentence-based with regex or NLTK, or paragraph-based).
 - **TF-IDF Vectorization**: Transforms text chunks and queries into numerical vectors.
 - **Cosine Similarity**: Measures semantic relevance between a query and document chunks.
 - **Response Synthesis**: Combines top-retrieved chunks into a coherent answer.
+""")
+
+st.markdown("### Chunking Strategies")
+st.markdown("""
+- **Fixed-Size**: Splits text into chunks of a specified word count with optional overlap.
+- **Regex (Sentence)**: Uses regular expressions to split text at sentence boundaries.
+- **NLTK (Sentence)**: Uses NLTK's advanced sentence tokenizer for more accurate sentence detection.
+- **Paragraph**: Splits text at paragraph breaks (double newlines), preserving natural document structure.
 """)
 
 st.markdown("### Application Structure")

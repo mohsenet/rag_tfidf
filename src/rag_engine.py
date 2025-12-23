@@ -35,6 +35,16 @@ def chunk_sentence_nltk(text: str, _nltk_available: bool = True) -> List[str]:
     except ImportError:
         return chunk_sentence_regex(text)
 
+def chunk_paragraph(text: str) -> List[str]:
+    """
+    Splits text into paragraphs based on double newlines or multiple consecutive newlines.
+    Filters out empty paragraphs and strips whitespace.
+    """
+    # Split on one or more blank lines (two or more consecutive newlines)
+    paragraphs = re.split(r'\n\s*\n', text.strip())
+    # Filter out empty strings and strip whitespace from each paragraph
+    return [p.strip() for p in paragraphs if p.strip()]
+
 
 # ===== RAG SYSTEM =====
 
@@ -55,6 +65,8 @@ class SimpleRAG:
             return chunk_sentence_regex(text)
         elif self.chunking_method == "nltk":
             return chunk_sentence_nltk(text, self._nltk_available)
+        elif self.chunking_method == "paragraph":
+            return chunk_paragraph(text)
         else:
             raise ValueError(f"Unknown method: {self.chunking_method}")
 

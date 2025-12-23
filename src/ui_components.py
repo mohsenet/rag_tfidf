@@ -23,8 +23,8 @@ def render_chunking_options(nltk_available: bool):
     st.sidebar.header("SplitOptions")
     chunking_choice = st.sidebar.selectbox(
         "Chunking Strategy",
-        options=["fixed", "regex", "nltk"],
-        index=["fixed", "regex", "nltk"].index(st.session_state.chunking_choice)
+        options=["fixed", "regex", "nltk", "paragraph"],
+        index=["fixed", "regex", "nltk", "paragraph"].index(st.session_state.chunking_choice)
     )
     st.session_state.chunking_choice = chunking_choice
 
@@ -38,6 +38,9 @@ def render_chunking_options(nltk_available: bool):
         )
         st.session_state.chunk_size = chunk_size
         st.session_state.overlap = overlap
+    
+    if chunking_choice == "paragraph":
+        st.sidebar.info("📝 Splits text by paragraph breaks (double newlines)")
 
     if chunking_choice == "nltk" and not nltk_available:
         st.warning("⚠️ NLTK not available. Install with `pip install nltk`.")
@@ -52,3 +55,4 @@ def render_developer_info():
     st.sidebar.markdown("[LinkedIn](https://linkedin.com/in/mohsen-moghimbegloo)")
     st.sidebar.markdown("[X (Twitter)](https://x.com/Moghimbegloo)")
     st.sidebar.markdown("[YouTube](https://www.youtube.com/@mohsenmoghimbegloo)")
+    
