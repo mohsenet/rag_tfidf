@@ -1,10 +1,9 @@
-# rag_builder.py
-
 import streamlit as st
 from rag_engine import SimpleRAG
 
 
-def build_rag_engine(document_text: str | None, chunking_choice: str, chunk_size: int, overlap: int, nltk_available: bool):
+def build_rag_engine(document_text: str | None, chunking_choice: str, chunk_size: int, 
+                    overlap: int, window_size: int, step_size: int, nltk_available: bool):
     """
     Builds and initializes a SimpleRAG instance from the provided document text and settings.
     Returns the RAG object or None if document is missing.
@@ -17,6 +16,8 @@ def build_rag_engine(document_text: str | None, chunking_choice: str, chunk_size
             chunking_method=chunking_choice,
             chunk_size=chunk_size,
             overlap=overlap,
+            window_size=window_size,
+            step_size=step_size,
             _nltk_available=nltk_available
         )
         rag.add_documents(document_text)
@@ -25,4 +26,4 @@ def build_rag_engine(document_text: str | None, chunking_choice: str, chunk_size
     except Exception as e:
         st.error(f"Error: {e}")
         return None
-
+    

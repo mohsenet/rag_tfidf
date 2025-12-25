@@ -18,3 +18,4 @@ def ensure_nltk_punkt() -> bool:
             return True
     except Exception:
         return False
+    

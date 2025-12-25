@@ -12,7 +12,7 @@ This application presents a lightweight, educational implementation of a **Retri
 
 st.markdown("### Core Components")
 st.markdown("""
-- **Text Chunking**: Splits the source document using configurable strategies (fixed-size, sentence-based with regex or NLTK, or paragraph-based).
+- **Text Chunking**: Splits the source document using configurable strategies (fixed-size, sentence-based with regex or NLTK, paragraph-based, or sliding window).
 - **TF-IDF Vectorization**: Transforms text chunks and queries into numerical vectors.
 - **Cosine Similarity**: Measures semantic relevance between a query and document chunks.
 - **Response Synthesis**: Combines top-retrieved chunks into a coherent answer.
@@ -24,6 +24,16 @@ st.markdown("""
 - **Regex (Sentence)**: Uses regular expressions to split text at sentence boundaries.
 - **NLTK (Sentence)**: Uses NLTK's advanced sentence tokenizer for more accurate sentence detection.
 - **Paragraph**: Splits text at paragraph breaks (double newlines), preserving natural document structure.
+- **Sliding Window**: Implements overlapping chunks where each chunk shares content with adjacent chunks. The window size determines chunk length, while step size controls how much the window moves forward (smaller step = more overlap).
+""")
+
+st.markdown("### Sliding Window Advantages")
+st.markdown("""
+The sliding window approach offers several benefits:
+- **Contextual Continuity**: Overlapping content ensures important information spanning chunk boundaries isn't lost.
+- **Improved Retrieval**: Multiple chunks may contain the same key information, increasing retrieval accuracy.
+- **Flexible Control**: Adjust window and step sizes to balance between redundancy and coverage.
+- **Better for Questions**: Queries about concepts mentioned near chunk boundaries are more likely to find relevant matches.
 """)
 
 st.markdown("### Application Structure")

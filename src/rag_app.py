@@ -6,13 +6,13 @@ from query_handler import handle_query_interface
 from rag_builder import build_rag_engine
 
 
+# ===== INITIALIZE SESSION STATE FIRST =====
+init_session_state()
+
 # ===== HANDLE NLTK AVAILABILITY =====
 _nltk_available = ensure_nltk_punkt()
 
-
-# ===== SESSION STATE & UI =====
-init_session_state()
-
+# ===== UI =====
 rag_question_answering()
 
 uploaded_file = st.file_uploader("Choose a text file (.txt)", type=["txt"])
@@ -23,13 +23,14 @@ render_document_status()
 # Render chunking options in sidebar
 chunking_choice = render_chunking_options(_nltk_available)
 
-
 # Build RAG
 rag = build_rag_engine(
     document_text=st.session_state.document_text,
     chunking_choice=st.session_state.chunking_choice,
     chunk_size=st.session_state.chunk_size,
     overlap=st.session_state.overlap,
+    window_size=st.session_state.window_size,
+    step_size=st.session_state.step_size,
     nltk_available=_nltk_available
 )
 

@@ -23,8 +23,8 @@ def render_chunking_options(nltk_available: bool):
     st.sidebar.header("SplitOptions")
     chunking_choice = st.sidebar.selectbox(
         "Chunking Strategy",
-        options=["fixed", "regex", "nltk", "paragraph"],
-        index=["fixed", "regex", "nltk", "paragraph"].index(st.session_state.chunking_choice)
+        options=["fixed", "regex", "nltk", "paragraph", "sliding"],
+        index=["fixed", "regex", "nltk", "paragraph", "sliding"].index(st.session_state.chunking_choice)
     )
     st.session_state.chunking_choice = chunking_choice
 
@@ -39,7 +39,22 @@ def render_chunking_options(nltk_available: bool):
         st.session_state.chunk_size = chunk_size
         st.session_state.overlap = overlap
     
-    if chunking_choice == "paragraph":
+    elif chunking_choice == "sliding":
+        window_size = st.sidebar.number_input(
+            "Window Size (words)", 10, 100, value=st.session_state.window_size
+        )
+        step_size = st.sidebar.number_input(
+            "Step Size (words)", 1, window_size,
+            value=min(st.session_state.step_size, window_size)
+        )
+        st.session_state.window_size = window_size
+        st.session_state.step_size = step_size
+        
+        overlap_words = window_size - step_size
+        st.sidebar.info(f"🔄 Overlap: {overlap_words} words\n\n"
+                       f"Each chunk shares {overlap_words} words with the next chunk.")
+    
+    elif chunking_choice == "paragraph":
         st.sidebar.info("📝 Splits text by paragraph breaks (double newlines)")
 
     if chunking_choice == "nltk" and not nltk_available:
@@ -55,4 +70,3 @@ def render_developer_info():
     st.sidebar.markdown("[LinkedIn](https://linkedin.com/in/mohsen-moghimbegloo)")
     st.sidebar.markdown("[X (Twitter)](https://x.com/Moghimbegloo)")
     st.sidebar.markdown("[YouTube](https://www.youtube.com/@mohsenmoghimbegloo)")
-    

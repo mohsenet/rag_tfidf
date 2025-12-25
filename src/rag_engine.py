@@ -40,19 +40,52 @@ def chunk_paragraph(text: str) -> List[str]:
     Splits text into paragraphs based on double newlines or multiple consecutive newlines.
     Filters out empty paragraphs and strips whitespace.
     """
-    # Split on one or more blank lines (two or more consecutive newlines)
     paragraphs = re.split(r'\n\s*\n', text.strip())
-    # Filter out empty strings and strip whitespace from each paragraph
     return [p.strip() for p in paragraphs if p.strip()]
+
+def chunk_sliding_window(text: str, window_size: int = 20, step_size: int = 10) -> List[str]:
+    """
+    Implements sliding window chunking where each chunk overlaps with the previous one.
+    
+    Args:
+        text: Input text to chunk
+        window_size: Number of words in each chunk
+        step_size: Number of words to move forward for the next chunk (creates overlap when < window_size)
+    
+    Returns:
+        List of text chunks with controlled overlap
+    """
+    if window_size <= 0:
+        raise ValueError("Window size must be > 0")
+    if step_size <= 0:
+        raise ValueError("Step size must be > 0")
+    if step_size > window_size:
+        raise ValueError("Step size should not exceed window size for proper overlap")
+    
+    words = text.split()
+    chunks = []
+    
+    for i in range(0, len(words), step_size):
+        chunk = " ".join(words[i:i + window_size])
+        if chunk:
+            chunks.append(chunk)
+        # Stop if we've reached the end
+        if i + window_size >= len(words):
+            break
+    
+    return chunks
 
 
 # ===== RAG SYSTEM =====
 
 class SimpleRAG:
-    def __init__(self, chunking_method: str = "fixed", chunk_size: int = 15, overlap: int = 0, _nltk_available: bool = True):
+    def __init__(self, chunking_method: str = "fixed", chunk_size: int = 15, overlap: int = 0, 
+                 window_size: int = 20, step_size: int = 10, _nltk_available: bool = True):
         self.chunking_method = chunking_method
         self.chunk_size = chunk_size
         self.overlap = overlap if chunking_method == "fixed" else 0
+        self.window_size = window_size
+        self.step_size = step_size
         self._nltk_available = _nltk_available
         self.chunks = []
         self.vectorizer = TfidfVectorizer(stop_words='english')
@@ -67,6 +100,8 @@ class SimpleRAG:
             return chunk_sentence_nltk(text, self._nltk_available)
         elif self.chunking_method == "paragraph":
             return chunk_paragraph(text)
+        elif self.chunking_method == "sliding":
+            return chunk_sliding_window(text, self.window_size, self.step_size)
         else:
             raise ValueError(f"Unknown method: {self.chunking_method}")
 
@@ -89,4 +124,3 @@ class SimpleRAG:
         if not results:
             return "I don't have enough information to answer that question."
         return f"Based on the information: {' '.join(chunk for chunk, _ in results)}"
-    

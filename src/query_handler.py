@@ -1,5 +1,3 @@
-# query_handler.py
-
 import streamlit as st
 from rag_engine import SimpleRAG
 
@@ -22,4 +20,4 @@ def handle_query_interface(rag: SimpleRAG | None):
             st.divider()
     elif query and not rag:
         st.warning("Please upload a document first.")
-
+        
