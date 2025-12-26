@@ -3,7 +3,9 @@ from rag_engine import SimpleRAG
 
 
 def build_rag_engine(document_text: str | None, chunking_choice: str, chunk_size: int, 
-                    overlap: int, window_size: int, step_size: int, nltk_available: bool):
+                    overlap: int, window_size: int, step_size: int, 
+                    recursive_chunk_size: int, recursive_overlap: int,
+                    nltk_available: bool):
     """
     Builds and initializes a SimpleRAG instance from the provided document text and settings.
     Returns the RAG object or None if document is missing.
@@ -18,6 +20,8 @@ def build_rag_engine(document_text: str | None, chunking_choice: str, chunk_size
             overlap=overlap,
             window_size=window_size,
             step_size=step_size,
+            recursive_chunk_size=recursive_chunk_size,
+            recursive_overlap=recursive_overlap,
             _nltk_available=nltk_available
         )
         rag.add_documents(document_text)

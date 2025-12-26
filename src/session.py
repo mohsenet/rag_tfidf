@@ -24,6 +24,12 @@ def init_session_state():
     
     if "step_size" not in st.session_state:
         st.session_state.step_size = 10
+    
+    if "recursive_chunk_size" not in st.session_state:
+        st.session_state.recursive_chunk_size = 500
+    
+    if "recursive_overlap" not in st.session_state:
+        st.session_state.recursive_overlap = 50
 
 
 def handle_uploaded_file(uploaded_file):

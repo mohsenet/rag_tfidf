@@ -178,41 +178,106 @@ st.markdown("""
                 <td>Ensures context continuity</td>
                 <td>Higher redundancy</td>
             </tr>
+            <tr>
+                <td><strong>🌳 Recursive</strong></td>
+                <td>Complex documents</td>
+                <td>Intelligent splitting, preserves semantics</td>
+                <td>More processing time</td>
+            </tr>
         </tbody>
     </table>
 """, unsafe_allow_html=True)
 
 # Sliding window deep dive
-st.markdown("## 🔄 Sliding Window: Deep Dive")
+st.markdown("## 🔄 Advanced Chunking Strategies")
 
-col1, col2 = st.columns(2)
+tab1, tab2 = st.tabs(["🔄 Sliding Window", "🌳 Recursive Chunking"])
 
-with col1:
+with tab1:
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+            <div class="feature-card">
+                <h3>How It Works</h3>
+                <p style="line-height: 1.8;">
+                    The sliding window creates overlapping chunks by moving a fixed-size 
+                    window across the text. The <strong>window size</strong> determines 
+                    chunk length, while <strong>step size</strong> controls overlap.
+                </p>
+                <p style="line-height: 1.8;">
+                    For example, with window=20 and step=10, each chunk contains 20 words 
+                    and shares 10 words with the next chunk (50% overlap).
+                </p>
+            </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+            <div class="feature-card">
+                <h3>Key Benefits</h3>
+                <ul style="line-height: 1.8;">
+                    <li><strong>Context Preservation:</strong> Information spanning boundaries isn't lost</li>
+                    <li><strong>Improved Recall:</strong> Same content appears in multiple chunks</li>
+                    <li><strong>Flexible Control:</strong> Tune overlap for your needs</li>
+                    <li><strong>Better Matches:</strong> Questions about edge content find answers</li>
+                </ul>
+            </div>
+        """, unsafe_allow_html=True)
+
+with tab2:
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+            <div class="feature-card">
+                <h3>How It Works</h3>
+                <p style="line-height: 1.8;">
+                    Recursive chunking uses a <strong>hierarchy of separators</strong> to intelligently 
+                    split text while preserving semantic meaning:
+                </p>
+                <ol style="line-height: 1.8;">
+                    <li><strong>Paragraphs</strong> (\\n\\n) - First priority</li>
+                    <li><strong>Lines</strong> (\\n) - If paragraphs too large</li>
+                    <li><strong>Sentences</strong> (. ! ?) - For finer splits</li>
+                    <li><strong>Clauses</strong> (; ,) - Even finer splits</li>
+                    <li><strong>Words</strong> (spaces) - As needed</li>
+                    <li><strong>Characters</strong> - Last resort</li>
+                </ol>
+            </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+            <div class="feature-card">
+                <h3>Key Benefits</h3>
+                <ul style="line-height: 1.8;">
+                    <li><strong>Semantic Boundaries:</strong> Respects natural text structure</li>
+                    <li><strong>Adaptive:</strong> Adjusts strategy based on content</li>
+                    <li><strong>Context-Aware:</strong> Keeps related information together</li>
+                    <li><strong>Optimal Size:</strong> Targets ideal chunk size while preserving meaning</li>
+                    <li><strong>Overlap Support:</strong> Maintains context across chunks</li>
+                </ul>
+            </div>
+        """, unsafe_allow_html=True)
+    
     st.markdown("""
         <div class="feature-card">
-            <h3>How It Works</h3>
+            <h3>🎯 When to Use Recursive Chunking</h3>
             <p style="line-height: 1.8;">
-                The sliding window creates overlapping chunks by moving a fixed-size 
-                window across the text. The <strong>window size</strong> determines 
-                chunk length, while <strong>step size</strong> controls overlap.
+                Recursive chunking excels with:
             </p>
-            <p style="line-height: 1.8;">
-                For example, with window=20 and step=10, each chunk contains 20 words 
-                and shares 10 words with the next chunk (50% overlap).
-            </p>
-        </div>
-    """, unsafe_allow_html=True)
-
-with col2:
-    st.markdown("""
-        <div class="feature-card">
-            <h3>Key Benefits</h3>
             <ul style="line-height: 1.8;">
-                <li><strong>Context Preservation:</strong> Information spanning boundaries isn't lost</li>
-                <li><strong>Improved Recall:</strong> Same content appears in multiple chunks</li>
-                <li><strong>Flexible Control:</strong> Tune overlap for your needs</li>
-                <li><strong>Better Matches:</strong> Questions about edge content find answers</li>
+                <li><strong>Complex documents:</strong> Research papers, legal documents, technical manuals</li>
+                <li><strong>Mixed content:</strong> Documents with varying structure (lists, paragraphs, sections)</li>
+                <li><strong>Long-form text:</strong> Books, articles, reports where context matters</li>
+                <li><strong>Semantic queries:</strong> When you need chunks that respect topic boundaries</li>
             </ul>
+            <p style="line-height: 1.8; margin-top: 1rem;">
+                <strong>Example:</strong> With a target chunk size of 500 characters, the algorithm first tries 
+                to split at paragraph boundaries. If a paragraph exceeds 500 characters, it recursively splits 
+                by sentences, and so on down the hierarchy until optimal chunks are created.
+            </p>
         </div>
     """, unsafe_allow_html=True)
 

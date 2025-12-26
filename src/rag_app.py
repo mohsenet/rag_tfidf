@@ -61,6 +61,8 @@ if st.session_state.document_text:
             overlap=st.session_state.overlap,
             window_size=st.session_state.window_size,
             step_size=st.session_state.step_size,
+            recursive_chunk_size=st.session_state.recursive_chunk_size,
+            recursive_overlap=st.session_state.recursive_overlap,
             nltk_available=_nltk_available
         )
 else:

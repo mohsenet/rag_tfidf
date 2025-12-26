@@ -205,14 +205,15 @@ def render_chunking_options(nltk_available: bool):
         "regex": "📝 Sentence-based (Regex)",
         "nltk": "🎯 Sentence-based (NLTK)",
         "paragraph": "📃 Paragraph-based",
-        "sliding": "🔄 Sliding window with overlap"
+        "sliding": "🔄 Sliding window with overlap",
+        "recursive": "🌳 Recursive hierarchical splitting"
     }
     
     chunking_choice = st.sidebar.selectbox(
         "Select Strategy",
-        options=["fixed", "regex", "nltk", "paragraph", "sliding"],
+        options=["fixed", "regex", "nltk", "paragraph", "sliding", "recursive"],
         format_func=lambda x: strategy_descriptions[x],
-        index=["fixed", "regex", "nltk", "paragraph", "sliding"].index(
+        index=["fixed", "regex", "nltk", "paragraph", "sliding", "recursive"].index(
             st.session_state.chunking_choice
         )
     )
@@ -271,6 +272,35 @@ def render_chunking_options(nltk_available: bool):
         **🔄 Overlap Analysis**
         - Overlap: {overlap_words} words ({overlap_percent:.1f}%)
         - Each chunk shares content with neighbors
+        """)
+    
+    elif chunking_choice == "recursive":
+        recursive_chunk_size = st.sidebar.slider(
+            "Chunk Size (characters)",
+            min_value=100,
+            max_value=2000,
+            value=st.session_state.recursive_chunk_size,
+            step=50,
+            help="Target chunk size in characters"
+        )
+        recursive_overlap = st.sidebar.slider(
+            "Overlap (characters)",
+            min_value=0,
+            max_value=min(500, recursive_chunk_size - 1),
+            value=min(st.session_state.recursive_overlap, recursive_chunk_size - 1),
+            help="Characters shared between consecutive chunks"
+        )
+        st.session_state.recursive_chunk_size = recursive_chunk_size
+        st.session_state.recursive_overlap = recursive_overlap
+        
+        overlap_percent = (recursive_overlap / recursive_chunk_size * 100)
+        st.sidebar.progress(recursive_overlap / recursive_chunk_size)
+        
+        st.sidebar.info(f"""
+        **🌳 Recursive Splitting**
+        - Overlap: {overlap_percent:.1f}%
+        - Tries paragraphs → sentences → words
+        - Preserves semantic boundaries
         """)
     
     elif chunking_choice == "paragraph":

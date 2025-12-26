@@ -75,17 +75,109 @@ def chunk_sliding_window(text: str, window_size: int = 20, step_size: int = 10) 
     
     return chunks
 
+def chunk_recursive(text: str, chunk_size: int = 500, chunk_overlap: int = 50) -> List[str]:
+    """
+    Implements recursive chunking using a hierarchy of separators.
+    Tries to split by paragraphs first, then sentences, then words.
+    
+    Args:
+        text: Input text to chunk
+        chunk_size: Target chunk size in characters
+        chunk_overlap: Number of characters to overlap between chunks
+    
+    Returns:
+        List of text chunks
+    """
+    if chunk_size <= 0:
+        raise ValueError("Chunk size must be > 0")
+    if chunk_overlap < 0:
+        chunk_overlap = 0
+    if chunk_overlap >= chunk_size:
+        chunk_overlap = chunk_size - 1
+    
+    # Define separators in order of priority
+    separators = [
+        "\n\n",  # Paragraphs
+        "\n",    # Lines
+        ". ",    # Sentences
+        "! ",    # Exclamations
+        "? ",    # Questions
+        "; ",    # Semicolons
+        ", ",    # Commas
+        " ",     # Words
+        ""       # Characters (fallback)
+    ]
+    
+    def split_text(text: str, separators: List[str]) -> List[str]:
+        """Recursively split text using hierarchical separators."""
+        if not separators:
+            # Base case: no more separators, return character chunks
+            return [text[i:i + chunk_size] for i in range(0, len(text), chunk_size - chunk_overlap)]
+        
+        separator = separators[0]
+        remaining_separators = separators[1:]
+        
+        if separator == "":
+            # Last resort: split by characters
+            return [text[i:i + chunk_size] for i in range(0, len(text), chunk_size - chunk_overlap)]
+        
+        splits = text.split(separator)
+        chunks = []
+        current_chunk = ""
+        
+        for i, split in enumerate(splits):
+            # Reconstruct with separator (except for last split)
+            if i < len(splits) - 1:
+                split = split + separator
+            
+            # If adding this split would exceed chunk_size, process current chunk
+            if len(current_chunk) + len(split) > chunk_size and current_chunk:
+                # If current chunk is still too large, recursively split it
+                if len(current_chunk) > chunk_size:
+                    sub_chunks = split_text(current_chunk, remaining_separators)
+                    chunks.extend(sub_chunks)
+                else:
+                    chunks.append(current_chunk.strip())
+                
+                # Start new chunk with overlap
+                if chunk_overlap > 0 and chunks:
+                    # Take last chunk_overlap characters from previous chunk
+                    overlap_text = current_chunk[-chunk_overlap:]
+                    current_chunk = overlap_text + split
+                else:
+                    current_chunk = split
+            else:
+                current_chunk += split
+        
+        # Add remaining chunk
+        if current_chunk.strip():
+            if len(current_chunk) > chunk_size:
+                sub_chunks = split_text(current_chunk, remaining_separators)
+                chunks.extend(sub_chunks)
+            else:
+                chunks.append(current_chunk.strip())
+        
+        return chunks
+    
+    result = split_text(text, separators)
+    # Filter out empty chunks
+    return [chunk for chunk in result if chunk.strip()]
+
 
 # ===== RAG SYSTEM =====
 
 class SimpleRAG:
     def __init__(self, chunking_method: str = "fixed", chunk_size: int = 15, overlap: int = 0, 
-                 window_size: int = 20, step_size: int = 10, _nltk_available: bool = True):
+                 window_size: int = 20, step_size: int = 10, 
+                 recursive_chunk_size: int = 500, recursive_overlap: int = 50,
+                 _nltk_available: bool = True):
         self.chunking_method = chunking_method
         self.chunk_size = chunk_size
         self.overlap = overlap if chunking_method == "fixed" else 0
         self.window_size = window_size
         self.step_size = step_size
+        self.recursive_chunk_size = recursive_chunk_size
+        self.recursive_overlap = recursive_overlap
         self._nltk_available = _nltk_available
         self.chunks = []
         self.vectorizer = TfidfVectorizer(stop_words='english')
@@ -102,6 +194,8 @@ class SimpleRAG:
             return chunk_paragraph(text)
         elif self.chunking_method == "sliding":
             return chunk_sliding_window(text, self.window_size, self.step_size)
+        elif self.chunking_method == "recursive":
+            return chunk_recursive(text, self.recursive_chunk_size, self.recursive_overlap)
         else:
             raise ValueError(f"Unknown method: {self.chunking_method}")
 
@@ -124,3 +218,4 @@ class SimpleRAG:
         if not results:
             return "I don't have enough information to answer that question."
         return f"Based on the information: {' '.join(chunk for chunk, _ in results)}"
+    
