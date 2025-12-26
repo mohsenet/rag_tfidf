@@ -30,6 +30,12 @@ def init_session_state():
     
     if "recursive_overlap" not in st.session_state:
         st.session_state.recursive_overlap = 50
+    
+    if "semantic_buffer_size" not in st.session_state:
+        st.session_state.semantic_buffer_size = 1
+    
+    if "semantic_threshold" not in st.session_state:
+        st.session_state.semantic_threshold = 0.5
 
 
 def handle_uploaded_file(uploaded_file):

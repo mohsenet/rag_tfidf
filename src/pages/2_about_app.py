@@ -184,6 +184,12 @@ st.markdown("""
                 <td>Intelligent splitting, preserves semantics</td>
                 <td>More processing time</td>
             </tr>
+            <tr>
+                <td><strong>🧠 Semantic</strong></td>
+                <td>Topic-based documents</td>
+                <td>Natural topic boundaries, coherent chunks</td>
+                <td>Requires embeddings, variable sizes</td>
+            </tr>
         </tbody>
     </table>
 """, unsafe_allow_html=True)
@@ -191,7 +197,7 @@ st.markdown("""
 # Sliding window deep dive
 st.markdown("## 🔄 Advanced Chunking Strategies")
 
-tab1, tab2 = st.tabs(["🔄 Sliding Window", "🌳 Recursive Chunking"])
+tab1, tab2, tab3 = st.tabs(["🔄 Sliding Window", "🌳 Recursive Chunking", "🧠 Semantic Chunking"])
 
 with tab1:
     col1, col2 = st.columns(2)
@@ -277,6 +283,84 @@ with tab2:
                 <strong>Example:</strong> With a target chunk size of 500 characters, the algorithm first tries 
                 to split at paragraph boundaries. If a paragraph exceeds 500 characters, it recursively splits 
                 by sentences, and so on down the hierarchy until optimal chunks are created.
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+
+with tab3:
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+            <div class="feature-card">
+                <h3>How It Works</h3>
+                <p style="line-height: 1.8;">
+                    Semantic chunking analyzes the <strong>meaning</strong> of text using embeddings:
+                </p>
+                <ol style="line-height: 1.8;">
+                    <li><strong>Sentence Splitting:</strong> Breaks text into sentences</li>
+                    <li><strong>Embedding Generation:</strong> Creates TF-IDF vectors for each sentence</li>
+                    <li><strong>Similarity Analysis:</strong> Compares consecutive sentence groups</li>
+                    <li><strong>Boundary Detection:</strong> Splits when similarity drops below threshold</li>
+                    <li><strong>Chunk Formation:</strong> Groups semantically similar sentences together</li>
+                </ol>
+                <p style="line-height: 1.8; margin-top: 1rem;">
+                    The result is chunks that naturally align with topic changes in the document.
+                </p>
+            </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+            <div class="feature-card">
+                <h3>Key Benefits</h3>
+                <ul style="line-height: 1.8;">
+                    <li><strong>Topic Coherence:</strong> Each chunk focuses on a single topic</li>
+                    <li><strong>Natural Boundaries:</strong> Splits align with semantic shifts</li>
+                    <li><strong>Adaptive Size:</strong> Chunks grow/shrink based on content</li>
+                    <li><strong>Better Retrieval:</strong> Semantically unified chunks improve search</li>
+                    <li><strong>No Manual Tuning:</strong> Automatically finds optimal splits</li>
+                </ul>
+            </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("""
+        <div class="feature-card">
+            <h3>🎯 When to Use Semantic Chunking</h3>
+            <p style="line-height: 1.8;">
+                Semantic chunking is ideal for:
+            </p>
+            <ul style="line-height: 1.8;">
+                <li><strong>Multi-topic documents:</strong> Articles covering several distinct subjects</li>
+                <li><strong>News articles:</strong> Stories with clear topic transitions</li>
+                <li><strong>Educational content:</strong> Textbooks with distinct concepts per section</li>
+                <li><strong>Research papers:</strong> Papers with introduction, methods, results, discussion</li>
+                <li><strong>Meeting transcripts:</strong> Conversations that shift between topics</li>
+            </ul>
+            
+            <h4 style="margin-top: 1.5rem;">⚙️ Parameter Guide</h4>
+            <p style="line-height: 1.8;">
+                <strong>Buffer Size (1-5 sentences):</strong>
+            </p>
+            <ul style="line-height: 1.8;">
+                <li><strong>1 sentence:</strong> More sensitive, creates smaller chunks</li>
+                <li><strong>2-3 sentences:</strong> Balanced approach (recommended)</li>
+                <li><strong>4-5 sentences:</strong> Less sensitive, creates larger chunks</li>
+            </ul>
+            
+            <p style="line-height: 1.8; margin-top: 1rem;">
+                <strong>Similarity Threshold (0.0-1.0):</strong>
+            </p>
+            <ul style="line-height: 1.8;">
+                <li><strong>0.3-0.4:</strong> More splits, smaller chunks</li>
+                <li><strong>0.5-0.6:</strong> Balanced (recommended)</li>
+                <li><strong>0.7-0.8:</strong> Fewer splits, larger chunks</li>
+            </ul>
+            
+            <p style="line-height: 1.8; margin-top: 1rem;">
+                <strong>Example:</strong> With buffer_size=2 and threshold=0.5, the algorithm compares 
+                pairs of consecutive sentences. When similarity between adjacent pairs drops below 0.5, 
+                it creates a chunk boundary, ensuring each chunk contains semantically related content.
             </p>
         </div>
     """, unsafe_allow_html=True)

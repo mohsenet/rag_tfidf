@@ -206,14 +206,15 @@ def render_chunking_options(nltk_available: bool):
         "nltk": "🎯 Sentence-based (NLTK)",
         "paragraph": "📃 Paragraph-based",
         "sliding": "🔄 Sliding window with overlap",
-        "recursive": "🌳 Recursive hierarchical splitting"
+        "recursive": "🌳 Recursive hierarchical splitting",
+        "semantic": "🧠 Semantic similarity-based splitting"
     }
     
     chunking_choice = st.sidebar.selectbox(
         "Select Strategy",
-        options=["fixed", "regex", "nltk", "paragraph", "sliding", "recursive"],
+        options=["fixed", "regex", "nltk", "paragraph", "sliding", "recursive", "semantic"],
         format_func=lambda x: strategy_descriptions[x],
-        index=["fixed", "regex", "nltk", "paragraph", "sliding", "recursive"].index(
+        index=["fixed", "regex", "nltk", "paragraph", "sliding", "recursive", "semantic"].index(
             st.session_state.chunking_choice
         )
     )
@@ -301,6 +302,41 @@ def render_chunking_options(nltk_available: bool):
         - Overlap: {overlap_percent:.1f}%
         - Tries paragraphs → sentences → words
         - Preserves semantic boundaries
+        """)
+    
+    elif chunking_choice == "semantic":
+        semantic_buffer_size = st.sidebar.slider(
+            "Buffer Size (sentences)",
+            min_value=1,
+            max_value=5,
+            value=st.session_state.semantic_buffer_size,
+            help="Number of sentences to group for comparison"
+        )
+        semantic_threshold = st.sidebar.slider(
+            "Similarity Threshold",
+            min_value=0.0,
+            max_value=1.0,
+            value=st.session_state.semantic_threshold,
+            step=0.05,
+            help="Minimum similarity to keep sentences together (lower = more splits)"
+        )
+        st.session_state.semantic_buffer_size = semantic_buffer_size
+        st.session_state.semantic_threshold = semantic_threshold
+        
+        st.sidebar.info(f"""
+        **🧠 Semantic Chunking**
+        - Buffer: {semantic_buffer_size} sentence(s)
+        - Threshold: {semantic_threshold:.2f}
+        - Splits when similarity drops
+        - Creates coherent topic-based chunks
+        """)
+        
+        st.sidebar.markdown("**📊 How it works:**")
+        st.sidebar.caption("""
+        1. Compares sentence groups
+        2. Calculates semantic similarity
+        3. Splits when similarity < threshold
+        4. Results in naturally coherent chunks
         """)
     
     elif chunking_choice == "paragraph":

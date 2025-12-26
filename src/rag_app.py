@@ -63,6 +63,8 @@ if st.session_state.document_text:
             step_size=st.session_state.step_size,
             recursive_chunk_size=st.session_state.recursive_chunk_size,
             recursive_overlap=st.session_state.recursive_overlap,
+            semantic_buffer_size=st.session_state.semantic_buffer_size,
+            semantic_threshold=st.session_state.semantic_threshold,
             nltk_available=_nltk_available
         )
 else:

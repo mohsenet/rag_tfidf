@@ -75,6 +75,78 @@ def chunk_sliding_window(text: str, window_size: int = 20, step_size: int = 10) 
     
     return chunks
 
+def chunk_semantic(text: str, buffer_size: int = 1, breakpoint_threshold: float = 0.5) -> List[str]:
+    """
+    Implements semantic chunking by comparing sentence embeddings.
+    Splits text when semantic similarity between consecutive sentences drops below threshold.
+    
+    Args:
+        text: Input text to chunk
+        buffer_size: Number of sentences to combine for comparison
+        breakpoint_threshold: Similarity threshold for creating chunk boundaries (0-1)
+    
+    Returns:
+        List of semantically coherent text chunks
+    """
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.metrics.pairwise import cosine_similarity
+    import numpy as np
+    
+    # Split into sentences using regex
+    sentences = re.split(r'(?<=[.!?])\s+', text.strip())
+    sentences = [s for s in sentences if s.strip()]
+    
+    if len(sentences) <= 1:
+        return sentences
+    
+    # Create sentence embeddings using TF-IDF
+    vectorizer = TfidfVectorizer(stop_words='english')
+    try:
+        sentence_vectors = vectorizer.fit_transform(sentences)
+    except ValueError:
+        # If vectorization fails (e.g., all stop words), return original sentences
+        return sentences
+    
+    # Calculate similarities between consecutive sentence groups
+    similarities = []
+    for i in range(len(sentences) - buffer_size):
+        # Compare groups of sentences
+        group1_indices = range(i, min(i + buffer_size, len(sentences)))
+        group2_indices = range(i + buffer_size, min(i + 2 * buffer_size, len(sentences)))
+        
+        if not group2_indices:
+            break
+        
+        # Average vectors for each group
+        group1_vec = sentence_vectors[list(group1_indices)].toarray().mean(axis=0, keepdims=True)
+        group2_vec = sentence_vectors[list(group2_indices)].toarray().mean(axis=0, keepdims=True)
+
+        
+        # Calculate similarity
+        sim = cosine_similarity(group1_vec, group2_vec)[0][0]
+        similarities.append(sim)
+    
+    # Find breakpoints where similarity drops below threshold
+    chunks = []
+    current_chunk = [sentences[0]]
+    
+    for i, sim in enumerate(similarities):
+        sentence_idx = i + buffer_size
+        if sentence_idx < len(sentences):
+            if sim < breakpoint_threshold:
+                # Similarity dropped - create new chunk
+                chunks.append(" ".join(current_chunk))
+                current_chunk = [sentences[sentence_idx]]
+            else:
+                # Continue building current chunk
+                current_chunk.append(sentences[sentence_idx])
+    
+    # Add remaining sentences
+    if current_chunk:
+        chunks.append(" ".join(current_chunk))
+    
+    return [chunk.strip() for chunk in chunks if chunk.strip()]
+
 def chunk_recursive(text: str, chunk_size: int = 500, chunk_overlap: int = 50) -> List[str]:
     """
     Implements recursive chunking using a hierarchy of separators.
@@ -170,6 +242,7 @@ class SimpleRAG:
     def __init__(self, chunking_method: str = "fixed", chunk_size: int = 15, overlap: int = 0, 
                  window_size: int = 20, step_size: int = 10, 
                  recursive_chunk_size: int = 500, recursive_overlap: int = 50,
+                 semantic_buffer_size: int = 1, semantic_threshold: float = 0.5,
                  _nltk_available: bool = True):
         self.chunking_method = chunking_method
         self.chunk_size = chunk_size
@@ -178,6 +251,8 @@ class SimpleRAG:
         self.step_size = step_size
         self.recursive_chunk_size = recursive_chunk_size
         self.recursive_overlap = recursive_overlap
+        self.semantic_buffer_size = semantic_buffer_size
+        self.semantic_threshold = semantic_threshold
         self._nltk_available = _nltk_available
         self.chunks = []
         self.vectorizer = TfidfVectorizer(stop_words='english')
@@ -196,6 +271,8 @@ class SimpleRAG:
             return chunk_sliding_window(text, self.window_size, self.step_size)
         elif self.chunking_method == "recursive":
             return chunk_recursive(text, self.recursive_chunk_size, self.recursive_overlap)
+        elif self.chunking_method == "semantic":
+            return chunk_semantic(text, self.semantic_buffer_size, self.semantic_threshold)
         else:
             raise ValueError(f"Unknown method: {self.chunking_method}")
 
