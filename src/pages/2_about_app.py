@@ -90,7 +90,7 @@ with col2:
         <div class="feature-card">
             <h3>📊 Key Statistics</h3>
             <ul style="list-style: none; padding: 0;">
-                <li>🔢 <strong>5</strong> Chunking Strategies</li>
+                <li>🔢 <strong>8</strong> Chunking Strategies</li>
                 <li>📝 <strong>TF-IDF</strong> Vectorization</li>
                 <li>🎯 <strong>Cosine</strong> Similarity</li>
                 <li>⚡ <strong>Real-time</strong> Processing</li>
@@ -190,14 +190,20 @@ st.markdown("""
                 <td>Natural topic boundaries, coherent chunks</td>
                 <td>Requires embeddings, variable sizes</td>
             </tr>
+            <tr>
+                <td><strong>📚 Hierarchical</strong></td>
+                <td>Structured documents</td>
+                <td>Respects document structure, preserves headings</td>
+                <td>Best with formatted text</td>
+            </tr>
         </tbody>
     </table>
 """, unsafe_allow_html=True)
 
-# Sliding window deep dive
+# Advanced strategies deep dive
 st.markdown("## 🔄 Advanced Chunking Strategies")
 
-tab1, tab2, tab3 = st.tabs(["🔄 Sliding Window", "🌳 Recursive Chunking", "🧠 Semantic Chunking"])
+tab1, tab2, tab3, tab4 = st.tabs(["🔄 Sliding Window", "🌳 Recursive", "🧠 Semantic", "📚 Hierarchical"])
 
 with tab1:
     col1, col2 = st.columns(2)
@@ -266,26 +272,6 @@ with tab2:
                 </ul>
             </div>
         """, unsafe_allow_html=True)
-    
-    st.markdown("""
-        <div class="feature-card">
-            <h3>🎯 When to Use Recursive Chunking</h3>
-            <p style="line-height: 1.8;">
-                Recursive chunking excels with:
-            </p>
-            <ul style="line-height: 1.8;">
-                <li><strong>Complex documents:</strong> Research papers, legal documents, technical manuals</li>
-                <li><strong>Mixed content:</strong> Documents with varying structure (lists, paragraphs, sections)</li>
-                <li><strong>Long-form text:</strong> Books, articles, reports where context matters</li>
-                <li><strong>Semantic queries:</strong> When you need chunks that respect topic boundaries</li>
-            </ul>
-            <p style="line-height: 1.8; margin-top: 1rem;">
-                <strong>Example:</strong> With a target chunk size of 500 characters, the algorithm first tries 
-                to split at paragraph boundaries. If a paragraph exceeds 500 characters, it recursively splits 
-                by sentences, and so on down the hierarchy until optimal chunks are created.
-            </p>
-        </div>
-    """, unsafe_allow_html=True)
 
 with tab3:
     col1, col2 = st.columns(2)
@@ -304,9 +290,6 @@ with tab3:
                     <li><strong>Boundary Detection:</strong> Splits when similarity drops below threshold</li>
                     <li><strong>Chunk Formation:</strong> Groups semantically similar sentences together</li>
                 </ol>
-                <p style="line-height: 1.8; margin-top: 1rem;">
-                    The result is chunks that naturally align with topic changes in the document.
-                </p>
             </div>
         """, unsafe_allow_html=True)
     
@@ -319,48 +302,106 @@ with tab3:
                     <li><strong>Natural Boundaries:</strong> Splits align with semantic shifts</li>
                     <li><strong>Adaptive Size:</strong> Chunks grow/shrink based on content</li>
                     <li><strong>Better Retrieval:</strong> Semantically unified chunks improve search</li>
-                    <li><strong>No Manual Tuning:</strong> Automatically finds optimal splits</li>
+                </ul>
+            </div>
+        """, unsafe_allow_html=True)
+
+with tab4:
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+            <div class="feature-card">
+                <h3>How It Works</h3>
+                <p style="line-height: 1.8;">
+                    Hierarchical chunking is <strong>content-aware</strong> and respects document structure:
+                </p>
+                <ol style="line-height: 1.8;">
+                    <li><strong>Structure Detection:</strong> Identifies headings, lists, paragraphs</li>
+                    <li><strong>Hierarchy Analysis:</strong> Determines heading levels and nesting</li>
+                    <li><strong>Smart Grouping:</strong> Keeps related content together</li>
+                    <li><strong>Context Preservation:</strong> Maintains heading context in chunks</li>
+                    <li><strong>Size Management:</strong> Splits large sections while preserving meaning</li>
+                </ol>
+                <p style="line-height: 1.8; margin-top: 1rem;">
+                    The algorithm recognizes multiple heading formats including Markdown (#, ##), 
+                    underlined headings (===, ---), and title-case text.
+                </p>
+            </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+            <div class="feature-card">
+                <h3>Key Benefits</h3>
+                <ul style="line-height: 1.8;">
+                    <li><strong>Structure Awareness:</strong> Respects document organization</li>
+                    <li><strong>Heading Preservation:</strong> Keeps headings with their content</li>
+                    <li><strong>List Integrity:</strong> Maintains list items together</li>
+                    <li><strong>Context Continuity:</strong> Adds section context to split chunks</li>
+                    <li><strong>Semantic Coherence:</strong> Each chunk is a complete unit of meaning</li>
                 </ul>
             </div>
         """, unsafe_allow_html=True)
     
     st.markdown("""
         <div class="feature-card">
-            <h3>🎯 When to Use Semantic Chunking</h3>
+            <h3>🎯 When to Use Hierarchical Chunking</h3>
             <p style="line-height: 1.8;">
-                Semantic chunking is ideal for:
+                Hierarchical chunking excels with:
             </p>
             <ul style="line-height: 1.8;">
-                <li><strong>Multi-topic documents:</strong> Articles covering several distinct subjects</li>
-                <li><strong>News articles:</strong> Stories with clear topic transitions</li>
-                <li><strong>Educational content:</strong> Textbooks with distinct concepts per section</li>
-                <li><strong>Research papers:</strong> Papers with introduction, methods, results, discussion</li>
-                <li><strong>Meeting transcripts:</strong> Conversations that shift between topics</li>
+                <li><strong>Technical documentation:</strong> API docs, user manuals, guides with clear sections</li>
+                <li><strong>Academic papers:</strong> Research papers with Introduction, Methods, Results sections</li>
+                <li><strong>Reports:</strong> Business reports, white papers with hierarchical structure</li>
+                <li><strong>Books:</strong> Chapters, sections, and subsections</li>
+                <li><strong>Markdown files:</strong> README files, documentation with # headings</li>
+                <li><strong>Structured content:</strong> Any document with clear organizational hierarchy</li>
             </ul>
             
             <h4 style="margin-top: 1.5rem;">⚙️ Parameter Guide</h4>
             <p style="line-height: 1.8;">
-                <strong>Buffer Size (1-5 sentences):</strong>
+                <strong>Max Chunk Size (500-3000 chars):</strong>
             </p>
             <ul style="line-height: 1.8;">
-                <li><strong>1 sentence:</strong> More sensitive, creates smaller chunks</li>
-                <li><strong>2-3 sentences:</strong> Balanced approach (recommended)</li>
-                <li><strong>4-5 sentences:</strong> Less sensitive, creates larger chunks</li>
+                <li><strong>500-1000:</strong> Smaller, more focused chunks (better for precise retrieval)</li>
+                <li><strong>1000-2000:</strong> Balanced approach (recommended for most documents)</li>
+                <li><strong>2000-3000:</strong> Larger context windows (better for complex topics)</li>
             </ul>
             
             <p style="line-height: 1.8; margin-top: 1rem;">
-                <strong>Similarity Threshold (0.0-1.0):</strong>
+                <strong>Preserve Structure Context:</strong>
             </p>
             <ul style="line-height: 1.8;">
-                <li><strong>0.3-0.4:</strong> More splits, smaller chunks</li>
-                <li><strong>0.5-0.6:</strong> Balanced (recommended)</li>
-                <li><strong>0.7-0.8:</strong> Fewer splits, larger chunks</li>
+                <li><strong>Enabled:</strong> Continuation chunks include reference to parent section</li>
+                <li><strong>Disabled:</strong> Chunks stand alone without context markers</li>
+            </ul>
+            
+            <h4 style="margin-top: 1.5rem;">📝 Recognized Formats</h4>
+            <p style="line-height: 1.8;">
+                <strong>Headings:</strong>
+            </p>
+            <ul style="line-height: 1.8;">
+                <li>Markdown style: # Heading, ## Subheading, ### Sub-subheading</li>
+                <li>Underlined: Heading followed by ======= or -------</li>
+                <li>Title Case: Short Lines In Title Case Without Punctuation</li>
+                <li>ALL CAPS: SHORT LINES IN ALL CAPITAL LETTERS</li>
             </ul>
             
             <p style="line-height: 1.8; margin-top: 1rem;">
-                <strong>Example:</strong> With buffer_size=2 and threshold=0.5, the algorithm compares 
-                pairs of consecutive sentences. When similarity between adjacent pairs drops below 0.5, 
-                it creates a chunk boundary, ensuring each chunk contains semantically related content.
+                <strong>Lists:</strong>
+            </p>
+            <ul style="line-height: 1.8;">
+                <li>Bullet points: -, *, • prefix</li>
+                <li>Numbered: 1. 2. 3. format</li>
+                <li>Lettered: a) b) c) format</li>
+            </ul>
+            
+            <p style="line-height: 1.8; margin-top: 1rem;">
+                <strong>Example:</strong> A technical document with "# Installation", "## Prerequisites", 
+                and "## Steps" headings will create chunks that keep each section together. If a section 
+                exceeds max_chunk_size, it splits intelligently while adding "[Continued from: Installation]" 
+                to maintain context.
             </p>
         </div>
     """, unsafe_allow_html=True)
@@ -433,7 +474,7 @@ st.markdown("## 💡 Best Practices")
 practices = [
     {
         "title": "Choose the Right Strategy",
-        "content": "Match your chunking strategy to your document type. Use paragraph chunking for well-structured documents, sliding window for dense information."
+        "content": "Match your chunking strategy to your document type. Use hierarchical for structured documents, semantic for topic-based content, sliding window for dense information."
     },
     {
         "title": "Tune Parameters",
@@ -446,6 +487,10 @@ practices = [
     {
         "title": "Check Similarity Scores",
         "content": "Scores above 0.5 indicate strong relevance. Low scores suggest the answer may not be in the document or needs rephrasing."
+    },
+    {
+        "title": "Use Structure When Available",
+        "content": "If your document has headings, sections, or lists, hierarchical chunking will give the best results by preserving this organization."
     }
 ]
 

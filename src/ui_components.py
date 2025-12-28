@@ -2,6 +2,10 @@ import streamlit as st
 
 
 def rag_question_answering():
+    """
+    Initialize the Streamlit page configuration and apply custom CSS styling.
+    This should be called at the very beginning of the main app.
+    """
     st.set_page_config(
         page_title="Advanced RAG Demo",
         layout="wide",
@@ -141,7 +145,10 @@ def rag_question_answering():
 
 
 def render_document_status():
-    """Enhanced document status display with metrics"""
+    """
+    Display the current document status with metrics.
+    Shows upload prompt if no document is loaded, otherwise displays document statistics.
+    """
     document_text = st.session_state.get("document_text")
     
     if document_text is None:
@@ -193,7 +200,15 @@ def render_document_status():
 
 
 def render_chunking_options(nltk_available: bool):
-    """Enhanced sidebar UI with better organization and visual hierarchy"""
+    """
+    Render the sidebar UI for chunking strategy selection and parameter configuration.
+    
+    Args:
+        nltk_available: Whether NLTK is available for sentence tokenization
+    
+    Returns:
+        str: The selected chunking strategy
+    """
     
     st.sidebar.markdown("## ⚙️ Configuration")
     
@@ -207,16 +222,18 @@ def render_chunking_options(nltk_available: bool):
         "paragraph": "📃 Paragraph-based",
         "sliding": "🔄 Sliding window with overlap",
         "recursive": "🌳 Recursive hierarchical splitting",
-        "semantic": "🧠 Semantic similarity-based splitting"
+        "semantic": "🧠 Semantic similarity-based splitting",
+        "hierarchical": "📚 Content-aware hierarchical chunking"
     }
+    
+    all_strategies = ["fixed", "regex", "nltk", "paragraph", "sliding", "recursive", "semantic", "hierarchical"]
     
     chunking_choice = st.sidebar.selectbox(
         "Select Strategy",
-        options=["fixed", "regex", "nltk", "paragraph", "sliding", "recursive", "semantic"],
+        options=all_strategies,
         format_func=lambda x: strategy_descriptions[x],
-        index=["fixed", "regex", "nltk", "paragraph", "sliding", "recursive", "semantic"].index(
-            st.session_state.chunking_choice
-        )
+        index=all_strategies.index(st.session_state.chunking_choice),
+        help="Choose how to split your document into chunks"
     )
     st.session_state.chunking_choice = chunking_choice
     
@@ -225,6 +242,7 @@ def render_chunking_options(nltk_available: bool):
     st.sidebar.markdown("### 🎛️ Parameters")
     
     if chunking_choice == "fixed":
+        # Fixed-size chunking parameters
         chunk_size = st.sidebar.slider(
             "Chunk Size (words)",
             min_value=5,
@@ -248,6 +266,7 @@ def render_chunking_options(nltk_available: bool):
         st.sidebar.caption(f"Overlap: {overlap_percent:.1f}%")
     
     elif chunking_choice == "sliding":
+        # Sliding window parameters
         window_size = st.sidebar.slider(
             "Window Size (words)",
             min_value=10,
@@ -260,11 +279,12 @@ def render_chunking_options(nltk_available: bool):
             min_value=1,
             max_value=window_size,
             value=min(st.session_state.step_size, window_size),
-            help="How many words to move forward"
+            help="How many words to move forward for next chunk"
         )
         st.session_state.window_size = window_size
         st.session_state.step_size = step_size
         
+        # Calculate and display overlap
         overlap_words = window_size - step_size
         overlap_percent = (overlap_words / window_size * 100)
         
@@ -276,6 +296,7 @@ def render_chunking_options(nltk_available: bool):
         """)
     
     elif chunking_choice == "recursive":
+        # Recursive chunking parameters
         recursive_chunk_size = st.sidebar.slider(
             "Chunk Size (characters)",
             min_value=100,
@@ -305,6 +326,7 @@ def render_chunking_options(nltk_available: bool):
         """)
     
     elif chunking_choice == "semantic":
+        # Semantic chunking parameters
         semantic_buffer_size = st.sidebar.slider(
             "Buffer Size (sentences)",
             min_value=1,
@@ -339,7 +361,51 @@ def render_chunking_options(nltk_available: bool):
         4. Results in naturally coherent chunks
         """)
     
+    elif chunking_choice == "hierarchical":
+        # Hierarchical chunking parameters
+        hierarchical_max_size = st.sidebar.slider(
+            "Max Chunk Size (characters)",
+            min_value=500,
+            max_value=3000,
+            value=st.session_state.hierarchical_max_size,
+            step=100,
+            help="Maximum size for each chunk"
+        )
+        hierarchical_preserve = st.sidebar.checkbox(
+            "Preserve Structure Context",
+            value=st.session_state.hierarchical_preserve,
+            help="Keep heading context in continuation chunks"
+        )
+        st.session_state.hierarchical_max_size = hierarchical_max_size
+        st.session_state.hierarchical_preserve = hierarchical_preserve
+        
+        st.sidebar.info(f"""
+        **📚 Hierarchical Chunking**
+        - Max size: {hierarchical_max_size} chars
+        - Structure preservation: {'✓ Enabled' if hierarchical_preserve else '✗ Disabled'}
+        - Detects headings, lists, sections
+        - Respects document hierarchy
+        """)
+        
+        st.sidebar.markdown("**🔍 Detected Elements:**")
+        st.sidebar.caption("""
+        • Markdown headings (# ## ###)
+        • Underlined headings (===, ---)
+        • Title case headings
+        • Bullet/numbered lists
+        • Paragraph boundaries
+        """)
+        
+        st.sidebar.markdown("**✨ Key Features:**")
+        st.sidebar.caption("""
+        • Keeps headings with their content
+        • Maintains list item grouping
+        • Preserves section hierarchy
+        • Adds context to continuations
+        """)
+    
     elif chunking_choice == "paragraph":
+        # Paragraph chunking (no parameters)
         st.sidebar.info("""
         **📝 Paragraph Mode**
         - Splits at double newlines
@@ -348,6 +414,7 @@ def render_chunking_options(nltk_available: bool):
         """)
     
     elif chunking_choice in ["regex", "nltk"]:
+        # Sentence-based chunking (no parameters)
         st.sidebar.info(f"""
         **{"🎯 NLTK" if chunking_choice == "nltk" else "📝 Regex"} Sentence Mode**
         - Automatic sentence detection
@@ -355,6 +422,7 @@ def render_chunking_options(nltk_available: bool):
         - No additional parameters
         """)
     
+    # Warning for NLTK availability
     if chunking_choice == "nltk" and not nltk_available:
         st.sidebar.warning("⚠️ NLTK not available. Install with `pip install nltk`")
     
@@ -362,7 +430,9 @@ def render_chunking_options(nltk_available: bool):
 
 
 def render_developer_info():
-    """Enhanced developer info with social links"""
+    """
+    Display developer information and social links in the sidebar.
+    """
     st.sidebar.markdown("---")
     st.sidebar.markdown("### 👨‍💻 Developer")
     
@@ -413,7 +483,13 @@ def render_developer_info():
 
 
 def render_query_results(response: str, results: list):
-    """Enhanced display for query results"""
+    """
+    Display query results with retrieved chunks and similarity scores.
+    
+    Args:
+        response: The generated response text
+        results: List of tuples containing (chunk_text, similarity_score)
+    """
     
     # Response section
     st.markdown("### 💡 Answer")

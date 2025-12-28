@@ -65,6 +65,8 @@ if st.session_state.document_text:
             recursive_overlap=st.session_state.recursive_overlap,
             semantic_buffer_size=st.session_state.semantic_buffer_size,
             semantic_threshold=st.session_state.semantic_threshold,
+            hierarchical_max_size=st.session_state.hierarchical_max_size,
+            hierarchical_preserve=st.session_state.hierarchical_preserve,
             nltk_available=_nltk_available
         )
 else:
